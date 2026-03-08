@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>九州ドライブ旅行 3日間旅程表（最終版）</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro', 'Meiryo', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .header {
+    text-align: center;
+    padding: 40px 20px;
+    color: white;
+  }
+  .header h1 {
+    font-size: 2.2em;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+  }
+  .header .subtitle {
+    font-size: 1.1em;
+    opacity: 0.85;
+    letter-spacing: 0.05em;
+  }
+  .header .overview {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .overview-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 0.9em;
+    color: #fff;
+    backdrop-filter: blur(10px);
+  }
+
+  /* Day cards */
+  .day-card {
+    background: white;
+    border-radius: 20px;
+    margin-bottom: 28px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .day-header {
+    padding: 20px 28px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .day1 .day-header { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .day2 .day-header { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .day3 .day-header { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+
+  .day-badge {
+    background: rgba(255,255,255,0.25);
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 1.4em;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .day-title-block h2 {
+    font-size: 1.25em;
+    font-weight: 700;
+  }
+  .day-title-block .day-sub {
+    font-size: 0.85em;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+  .day-stats {
+    margin-left: auto;
+    text-align: right;
+    font-size: 0.8em;
+    opacity: 0.9;
+  }
+  .day-stats span {
+    display: block;
+    line-height: 1.6;
+  }
+
+  /* Timeline */
+  .timeline {
+    padding: 24px 28px;
+  }
+  .stop {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 0;
+    position: relative;
+  }
+  .stop:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 27px;
+    top: 52px;
+    bottom: -32px;
+    width: 2px;
+    background: #e0e0e0;
+  }
+  .stop-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 56px;
+  }
+  .stop-time {
+    font-size: 0.75em;
+    font-weight: 700;
+    color: #888;
+    white-space: nowrap;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stop-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    flex-shrink: 0;
+  }
+  .icon-start  { background: #e8f5e9; border: 2px solid #4caf50; }
+  .icon-view   { background: #e3f2fd; border: 2px solid #2196f3; }
+  .icon-nature { background: #f1f8e9; border: 2px solid #8bc34a; }
+  .icon-food   { background: #fff3e0; border: 2px solid #ff9800; }
+  .icon-volcano{ background: #fce4ec; border: 2px solid #e91e63; }
+  .icon-hotel  { background: #f3e5f5; border: 2px solid #9c27b0; }
+  .icon-shrine { background: #fff8e1; border: 2px solid #ffc107; }
+  .icon-gorge  { background: #e0f7fa; border: 2px solid #00bcd4; }
+  .icon-city   { background: #fafafa; border: 2px solid #607d8b; }
+
+  .stop-right {
+    flex: 1;
+    padding-bottom: 28px;
+  }
+  .stop-name {
+    font-size: 1.0em;
+    font-weight: 700;
+    color: #1a1a2e;
+    line-height: 1.3;
+  }
+  .stop-detail {
+    margin-top: 4px;
+    font-size: 0.82em;
+    color: #666;
+    line-height: 1.5;
+  }
+  .stop-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .tag {
+    border-radius: 10px;
+    padding: 3px 10px;
+    font-size: 0.74em;
+    font-weight: 600;
+  }
+  .tag-stay   { background: #e3f2fd; color: #1565c0; }
+  .tag-drive  { background: #f3e5f5; color: #6a1b9a; }
+  .tag-toll   { background: #fff3e0; color: #e65100; }
+  .tag-tip    { background: #e8f5e9; color: #1b5e20; }
+  .tag-warn   { background: #fff9c4; color: #f57f17; border: 1px solid #f9a825; }
+  .tag-lunch  { background: #fce4ec; color: #880e4f; }
+
+  /* Connector row (transit between stops) */
+  .transit {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 0;
+    position: relative;
+  }
+  .transit::before {
+    content: '';
+    position: absolute;
+    left: 27px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e0e0e0;
+  }
+  .transit-left {
+    min-width: 56px;
+  }
+  .transit-right {
+    flex: 1;
+    padding: 6px 0 6px 0;
+    font-size: 0.78em;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .transit-right .arrow { font-size: 0.9em; }
+
+  /* Summary box */
+  .day-summary {
+    background: #f8f9ff;
+    border-top: 1px solid #eee;
+    padding: 14px 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    font-size: 0.82em;
+    color: #555;
+  }
+  .day-summary span::before {
+    font-weight: 700;
+    color: #333;
+  }
+
+  /* Notes */
+  .notes-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px 28px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    margin-bottom: 28px;
+  }
+  .notes-card h3 {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .notes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .note-item {
+    background: #f8f9ff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.82em;
+    color: #555;
+    line-height: 1.6;
+    border-left: 4px solid #667eea;
+  }
+  .note-item.warn { border-left-color: #ff9800; background: #fff8f0; }
+  .note-item.green { border-left-color: #4caf50; background: #f0fff4; }
+  .note-item.red { border-left-color: #f44336; background: #fff5f5; }
+
+  .note-item strong {
+    display: block;
+    color: #333;
+    font-size: 1.0em;
+    margin-bottom: 4px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.8em;
+    padding: 16px 0 8px;
+  }
+
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.6em; }
+    .day-stats { display: none; }
+    .notes-grid { grid-template-columns: 1fr; }
+    .timeline { padding: 20px 16px; }
+    .day-header { padding: 16px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🗾 九州ドライブ旅行</h1>
+    <div class="subtitle">別府 → 阿蘇 → 高千穂 → 霧島 → 鹿児島 → 志布志　3日間旅程表</div>
+    <div class="overview">
+      <span class="overview-badge">📅 3日間</span>
+      <span class="overview-badge">🚗 総走行 約 457 km</span>
+      <span class="overview-badge">⏱ 総運転 約 10時間30分</span>
+      <span class="overview-badge">💴 高速代 約 2,140円</span>
+      <span class="overview-badge">🚢 志布志 18:30 出港</span>
+      <span class="overview-badge">🏨 宿泊2泊</span>
+    </div>
+  </div>
+
+  <!-- DAY 1 -->
+  <div class="day-card day1">
+    <div class="day-header">
+      <div class="day-badge">DAY 1</div>
+      <div class="day-title-block">
+        <h2>別府 → やまなみハイウェイ → 阿蘇</h2>
+        <div class="day-sub">絶景ドライブ！雄大な高原と火口を満喫</div>
+      </div>
+      <div class="day-stats">
+        <span>🚗 約 130 km</span>
+        <span>⏱ 運転 約 3時間</span>
+        <span>💴 無料（下道）</span>
+      </div>
+    </div>
+
+    <div class="timeline">
+
+      <!-- 別府ターミナル -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">07:15</div>
+          <div class="stop-icon icon-start">🚢</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">別府ターミナル（さんふらわあ）出発</div>
+          <div class="stop-detail">フェリーから下船後、すぐ出発。駐車場でトイレ・準備を済ませておくと◎</div>
+          <div class="stop-tags">
+            <span class="tag tag-tip">💡 出発前に給油推奨</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道500号 → やまなみハイウェイ　約40分・約30 km</div>
+      </div>
+
+      <!-- 由布岳展望台 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">07:55</div>
+          <div class="stop-icon icon-view">🏔</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">由布岳展望台</div>
+          <div class="stop-detail">やまなみハイウェイ沿いの絶景スポット。双耳峰の由布岳を一望できる。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 滞在 約20分</span>
+            <span class="tag tag-tip">📷 朝の光が美しい</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> やまなみハイウェイ（国道442号）　約50分・約35 km</div>
+      </div>
+
+      <!-- 長者原・タデ原湿原 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">09:05</div>
+          <div class="stop-icon icon-nature">🌿</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">長者原・タデ原湿原</div>
+          <div class="stop-detail">くじゅう連山を背景にした高層湿原。木道散策が楽しめる。ビジターセンターあり。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 滞在 約30分</span>
+            <span class="tag tag-tip">🐦 野鳥観察スポット</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> やまなみハイウェイ　約20分・約12 km</div>
+      </div>
+
+      <!-- 瀬の本高原 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">09:55</div>
+          <div class="stop-icon icon-nature">🐄</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">瀬の本高原（ミルクロード分岐点）</div>
+          <div class="stop-detail">広大な草原と牧場が広がる。ミルクロードとやまなみハイウェイの交差点。道路に牛注意！</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 滞在 約15分</span>
+            <span class="tag tag-warn">⚠️ 牛の飛び出し注意</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> ミルクロード（県道40号）　約50分・約18 km</div>
+      </div>
+
+      <!-- 大観峰 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">11:00</div>
+          <div class="stop-icon icon-view">🌋</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">大観峰</div>
+          <div class="stop-detail">阿蘇外輪山の最高峰からカルデラ全景を一望！阿蘇五岳がすべて見渡せる絶景ポイント。カフェあり。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 滞在 約60分</span>
+            <span class="tag tag-tip">☕ テイクアウトコーヒーあり</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道212号　約30分・約22 km</div>
+      </div>
+
+      <!-- 阿蘇道の駅（昼食） -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">12:30</div>
+          <div class="stop-icon icon-food">🍜</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">道の駅 阿蘇（昼食）</div>
+          <div class="stop-detail">阿蘇の郷土料理が揃う道の駅。あか牛丼・馬刺し・だご汁などが人気。お土産コーナーも充実。</div>
+          <div class="stop-tags">
+            <span class="tag tag-lunch">🥩 昼食 約50分</span>
+            <span class="tag tag-tip">🛒 お土産・補給もここで</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道57号 → 阿蘇パノラマライン　約25分・約13 km</div>
+      </div>
+
+      <!-- 草千里ヶ浜 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">13:45</div>
+          <div class="stop-icon icon-volcano">🌾</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">草千里ヶ浜</div>
+          <div class="stop-detail">阿蘇中岳を背景に広がる緑の草原。中央に池があり、馬が放牧されている幻想的な風景。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 滞在 約80分</span>
+            <span class="tag tag-warn">⚠️ 火山ガス規制要確認</span>
+            <span class="tag tag-tip">🐴 乗馬体験あり</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道57号 → 国道265号　約30分・約22 km</div>
+      </div>
+
+      <!-- 蘇山郷 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">15:35</div>
+          <div class="stop-icon icon-hotel">🏨</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">宿泊：蘇山郷　チェックイン</div>
+          <div class="stop-detail">阿蘇の自然に囲まれた温泉宿。阿蘇五岳を望む露天風呂が絶品。チェックイン 16:00。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🏨 1泊目</span>
+            <span class="tag tag-tip">♨️ 温泉でドライブ疲れを癒そう</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /timeline -->
+
+    <div class="day-summary">
+      <span>🚗 総走行距離：約 130 km</span>
+      <span>⏱ 総運転時間：約 3時間10分</span>
+      <span>💴 高速料金：0円（全て下道）</span>
+      <span>🅿 主要駐車場：大観峰・道の駅阿蘇・草千里（各無料〜300円）</span>
+    </div>
+  </div><!-- /day1 -->
+
+
+  <!-- DAY 2 -->
+  <div class="day-card day2">
+    <div class="day-header">
+      <div class="day-badge">DAY 2</div>
+      <div class="day-title-block">
+        <h2>阿蘇 → 高千穂峡 → 霧島</h2>
+        <div class="day-sub">神話の渓谷と九州最大の神社へ</div>
+      </div>
+      <div class="day-stats">
+        <span>🚗 約 180 km</span>
+        <span>⏱ 運転 約 4時間10分</span>
+        <span>💴 高速 約 1,300円</span>
+      </div>
+    </div>
+
+    <div class="timeline">
+
+      <!-- 蘇山郷 出発 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">09:00</div>
+          <div class="stop-icon icon-hotel">🏨</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">蘇山郷　チェックアウト・出発</div>
+          <div class="stop-detail">朝食後チェックアウト。出発前に燃料確認。</div>
+          <div class="stop-tags">
+            <span class="tag tag-tip">⛽ 出発前に給油推奨（高千穂方面は GS 少ない）</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道265号　約23分・約16 km</div>
+      </div>
+
+      <!-- 箱石峠 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">09:23</div>
+          <div class="stop-icon icon-view">🏔</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">箱石峠（展望台）</div>
+          <div class="stop-detail">阿蘇の外輪山と九重連山を一望する知る人ぞ知る絶景スポット。駐車スペースあり。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 滞在 約30分</span>
+            <span class="tag tag-tip">📷 広大な阿蘇の全景が撮れる</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道265号 → 宮崎県道50号　約55分・約55 km</div>
+      </div>
+
+      <!-- 高千穂峡 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">10:48</div>
+          <div class="stop-icon icon-gorge">🚣</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">高千穂峡</div>
+          <div class="stop-detail">五ヶ瀬川が削った柱状節理の絶壁と真名井の滝が圧巻。ボート遊覧がおすすめ（要事前予約）。高千穂神社への参拝も。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 滞在 約2時間42分（13:30出発）</span>
+            <span class="tag tag-warn">⚠️ ボートは事前予約必須</span>
+            <span class="tag tag-tip">🎟 ボート 30分 ¥2,000/艘</span>
+            <span class="tag tag-lunch">🍱 周辺で昼食 → 13:30 出発</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 宮崎道 → 九州自動車道（高千穂IC → 横川IC）　約2時間24分・約178 km　高速料金 約¥1,300</div>
+      </div>
+
+      <!-- 横川IC通過 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">15:54</div>
+          <div class="stop-icon icon-view">🛣</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">横川IC　高速出口</div>
+          <div class="stop-detail">九州自動車道を降りて国道223号へ。霧島連山を眺めながら快走。</div>
+          <div class="stop-tags">
+            <span class="tag tag-toll">💴 高速料金 約 ¥1,300</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道223号（霧島高原へ）　約29分・約21 km</div>
+      </div>
+
+      <!-- 霧島国際ホテル -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">16:23</div>
+          <div class="stop-icon icon-hotel">🏨</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">霧島国際ホテル　チェックイン</div>
+          <div class="stop-detail">霧島の大自然に囲まれた温泉リゾート。硫黄泉の湯に浸かりながら2日目の疲れを癒す。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🏨 2泊目</span>
+            <span class="tag tag-tip">♨️ 露天風呂・内風呂充実</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /timeline -->
+
+    <div class="day-summary">
+      <span>🚗 総走行距離：約 180 km</span>
+      <span>⏱ 総運転時間：約 4時間10分</span>
+      <span>💴 高速料金：約 1,300円（高千穂IC→横川IC）</span>
+      <span>🅿 高千穂峡駐車場：普通車 ¥500</span>
+    </div>
+  </div><!-- /day2 -->
+
+
+  <!-- DAY 3 -->
+  <div class="day-card day3">
+    <div class="day-header">
+      <div class="day-badge">DAY 3</div>
+      <div class="day-title-block">
+        <h2>霧島神宮 → 民芸村 → 鹿児島 → 志布志港</h2>
+        <div class="day-sub">参拝＆お土産 → 鹿児島市内でランチ → さんふらわあで帰路へ</div>
+      </div>
+      <div class="day-stats">
+        <span>🚗 約 147 km</span>
+        <span>⏱ 運転 約 3時間30分</span>
+        <span>💴 高速 約 840円</span>
+      </div>
+    </div>
+
+    <div class="timeline">
+
+      <!-- 霧島国際ホテル 出発 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">08:40</div>
+          <div class="stop-icon icon-hotel">🏨</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">霧島国際ホテル　チェックアウト・出発</div>
+          <div class="stop-detail">朝食・朝風呂を済ませてチェックアウト。市場食堂 11:30 予約に合わせて 08:40 出発。</div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道223号　約10分・約5 km</div>
+      </div>
+
+      <!-- 霧島神宮 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">08:50</div>
+          <div class="stop-icon icon-shrine">⛩</div>
+          <div class="stop-detail">天孫降臨の神話に登場するニニギノミコトを祀る格式高い神社。朱塗りの社殿と杉の古木が荘厳な雰囲気を醸す。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 滞在 約60分</span>
+            <span class="tag tag-tip">🛕 御朱印・お守りあり</span>
+            <span class="tag tag-tip">🌲 樹齢800年のご神木</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道223号沿い　すぐ隣・約2分・約0.5 km</div>
+      </div>
+
+      <!-- 霧島民芸村店 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">09:50</div>
+          <div class="stop-icon icon-shrine">🏺</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">霧島民芸村店　お土産ショッピング</div>
+          <div class="stop-detail">霧島神宮のすぐ隣に位置する複合施設。薩摩蒸氣屋（かるかん・どうなつ）・陶芸品・屋久杉工芸品・食堂が揃う。旅の締めにぴったりのお土産処。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 滞在 約20分</span>
+            <span class="tag tag-warn">⚠️ 水曜定休（祝日は営業）</span>
+            <span class="tag tag-tip">🏺 陶芸・屋久杉コーナー 8:30〜15:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道223号 → 溝辺鹿児島空港IC → 九州自動車道 → 鹿児島北IC　約60分・約42 km　高速料金 約¥840　※10:10出発で11:10着</div>
+      </div>
+
+      <!-- 市場食堂 城南店（昼食） -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">11:10</div>
+          <div class="stop-icon icon-food">🐟</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">市場食堂　城南店（昼食）</div>
+          <div class="stop-detail">鹿児島中央卸売市場直結の海鮮食堂。新鮮な刺身定食・海鮮丼が大人気。地元民も通う本格派。</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🍽 11:10着 → 11:30 予約時刻（余裕あり）</span>
+            <span class="tag tag-lunch">🍣 昼食 約60〜75分</span>
+            <span class="tag tag-warn">⚠️ ラストオーダー 14:30</span>
+            <span class="tag tag-warn">⚠️ 日曜・祝日 定休日</span>
+            <span class="tag tag-tip">📞 099-224-9864</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 鹿児島市内観光（天文館・桜島など）</div>
+      </div>
+
+      <!-- 鹿児島市内観光 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">12:30</div>
+          <div class="stop-icon icon-city">🌋</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">鹿児島市内観光</div>
+          <div class="stop-detail">
+            ▶ 天文館（鹿児島最大の繁華街・白熊かき氷）<br>
+            ▶ 鹿児島中央駅周辺でお土産<br>
+            ▶ 桜島フェリー（15分）で桜島を間近に<br>
+            ▶ 仙巌園（薩摩島津家の別邸庭園）
+          </div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 自由時間 約2時間30分</span>
+            <span class="tag tag-tip">🍧 白熊かき氷は天文館むじゃきへ</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道269号 → 大隅縦貫道　約100 km・約2時間　※無料区間中心</div>
+      </div>
+
+      <!-- 志布志港 到着 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">15:00</div>
+          <div class="stop-icon icon-hotel">🚗</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">鹿児島市内　出発 → 志布志港へ</div>
+          <div class="stop-detail">国道269号経由で大隅半島を縦断。志布志港フェリーターミナルを目指す。</div>
+          <div class="stop-tags">
+            <span class="tag tag-drive">🚗 約 100 km・約2時間</span>
+            <span class="tag tag-tip">⛽ 出発前に給油推奨</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 国道269号 → 志布志市街</div>
+      </div>
+
+      <!-- 志布志港 到着 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">17:00</div>
+          <div class="stop-icon icon-start">🚢</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">志布志港フェリーターミナル　到着（目標 17:30）</div>
+          <div class="stop-detail">商船三井さんふらわあ 志布志ターミナル。乗船手続き・車両乗船を済ませて出港に備える。<br>📍 〒889-7011 鹿児島県志布志市志布志町志布志3292</div>
+          <div class="stop-tags">
+            <span class="tag tag-stay">🕐 乗船手続き・待機</span>
+            <span class="tag tag-tip">📞 099-473-8185</span>
+            <span class="tag tag-warn">⚠️ 出港60〜90分前には到着を</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="transit">
+        <div class="transit-left"></div>
+        <div class="transit-right"><span class="arrow">↓</span> 車両乗船・出港準備</div>
+      </div>
+
+      <!-- さんふらわあ 出港 -->
+      <div class="stop">
+        <div class="stop-left">
+          <div class="stop-time">18:30</div>
+          <div class="stop-icon icon-start">⛴</div>
+        </div>
+        <div class="stop-right">
+          <div class="stop-name">🎉 さんふらわあ志布志　出港！</div>
+          <div class="stop-detail">九州ドライブ旅行の締めくくり。志布志港を出港し大阪（南港）へ。船内レストラン・大浴場でゆったりと旅の余韻を楽しもう。</div>
+          <div class="stop-tags">
+            <span class="tag tag-tip">🛳 大阪南港 翌朝着</span>
+            <span class="tag tag-tip">🍽 船内レストランあり</span>
+            <span class="tag tag-tip">♨️ 大浴場あり</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /timeline -->
+
+    <div class="day-summary">
+      <span>🚗 総走行距離：約 147 km</span>
+      <span>⏱ 総運転時間：約 3時間30分</span>
+      <span>💴 高速料金：約 840円（溝辺空港IC→鹿児島北IC）</span>
+      <span>🅿 霧島神宮・民芸村駐車場：無料　／　志布志港：フェリー利用者無料</span>
+    </div>
+  </div><!-- /day3 -->
+
+
+  <!-- 注意事項・事前確認 -->
+  <div class="notes-card">
+    <h3>📋 事前確認チェックリスト</h3>
+    <div class="notes-grid">
+      <div class="note-item warn">
+        <strong>🌋 阿蘇 火山規制</strong>
+        草千里・中岳火口周辺は火山ガス状況により立入規制あり。出発前に必ず確認。<br>
+        📱 <a href="https://www.aso.ne.jp/~volcano/index.html" target="_blank">阿蘇火山防災会議</a>
+      </div>
+      <div class="note-item warn">
+        <strong>🚣 高千穂峡 ボート予約</strong>
+        ボート遊覧は大変混雑。オンラインまたは電話で事前予約を。<br>
+        📱 <a href="https://takachiho-kanko.info/" target="_blank">高千穂町観光協会</a>
+      </div>
+      <div class="note-item red">
+        <strong>🐟 市場食堂 城南店</strong>
+        日曜・祝日は定休日。ラストオーダー 14:30。必ず事前確認を。<br>
+        📞 099-224-9864
+      </div>
+      <div class="note-item green">
+        <strong>🌡 気温・服装</strong>
+        高原エリア（阿蘇・高千穂）は平地より5〜10℃低い。<br>
+        軽いジャケットを忘れずに。
+      </div>
+      <div class="note-item">
+        <strong>⛽ 給油タイミング</strong>
+        別府出発時・蘇山郷出発時（高千穂方面はスタンド少）の2回が推奨。
+      </div>
+      <div class="note-item green">
+        <strong>🛣 高速料金まとめ</strong>
+        DAY1：0円 / DAY2：約¥1,300（高千穂IC→横川IC）/ DAY3：約¥840（溝辺空港IC→鹿児島北IC）<br>
+        合計：約 ¥2,140（鹿児島市内→志布志は国道269号・無料区間中心）
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    ※ 所要時間・料金は目安です。交通状況・季節により変動します。<br>
+    ※ 海地獄・血の池地獄は今回のルートから除外しています。<br>
+    ※ DAY3：高千穂峡 13:30出発 → 横川IC 15:54 → 霧島国際ホテル 16:23チェックイン。
+  </div>
+
+</div>
+</body>
+</html>
